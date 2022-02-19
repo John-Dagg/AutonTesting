@@ -18,17 +18,17 @@ public final class Constants {
 
     public static final class AutonDrivetrain{
 
-        public static final double ks = 0.24975; //Volts
-        public static final double kv = 4.3066; //Volt seconds per meter
-        public static final double ka = 0.29032; //Volt seconds squared per meter
+        public static final double ks = 0.26019; //Volts
+        public static final double kv = 4.2874; //Volt seconds per meter
+        public static final double ka = 0.41681 ; //Volt seconds squared per meter
 
-        public static final double kP = 4.5584; //Proportional Gain
+        public static final double kP = 1.57; //Proportional Gain
 
         public static final double robotWidth = Units.inchesToMeters(25.5);
         public static final DifferentialDriveKinematics driveKinematics = new DifferentialDriveKinematics(robotWidth);
 
         public static final double maxVel = 1.6; //Meters per second (Estimated Value)
-        public static final double maxAccel = 25; //Meters per second squared (Estimated Value)
+        public static final double maxAccel = 2; //Meters per second squared (Estimated Value)
 
         //Constants for using the ramsete controller
         public static final double ramseteB = 2;

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.io.Axis;
 import frc.robot.subsystems.Drivetrain;
 
 import java.io.IOException;
@@ -23,22 +24,38 @@ import java.nio.file.Path;
 public class RobotContainer {
 
   //Setting up auton files
-  private String pathing = "StraightPath"; //Change this to change trajectory
+  private String pathing = "Reverse1";
 
   private String trajectoryFile = "output/"+pathing+".wpilib.json";
   private Path trajectoryPath;
   private Trajectory trajectory;
 
+  private String pathing1 = "Reverse1"; //Change this to change trajectory
+  private String pathing2 = "Reverse2";
+
+  private String trajectoryFile1 = "output/"+pathing1+".wpilib.json";
+  private String trajectoryFile2 = "output/"+pathing2+".wpilib.json";
+  private Path trajectoryPath1;
+  private Path trajectoryPath2;
+  private Trajectory trajectory1;
+  private Trajectory trajectory2;
+
+  private Trajectory fullTrajectory;
+
   //Subsystems
   Drivetrain mDrivetrain = new Drivetrain();
 
-  Trajectory auton;
   RamseteCommand ramseteCommand;
 
   public RobotContainer() {
 
     configureButtonBindings();
     mDrivetrain.setDefaultCommand(new RunCommand(mDrivetrain::arcadeDrive, mDrivetrain));
+    /*
+    mDrivetrain.setDefaultCommand(new RunCommand(() -> mDrivetrain.arcadeDrive(
+            Constants.driverController.getRawAxis(Axis.AxisID.LEFT_Y.getID()), Constants.driverController.getRawAxis(Axis.AxisID.RIGHT_X.getID())), mDrivetrain));
+
+     */
   }
 
   private void configureButtonBindings() {
@@ -49,14 +66,28 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 
     try {
+      trajectoryPath1 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryFile1);
+      trajectory1 = TrajectoryUtil.fromPathweaverJson(trajectoryPath1);
+
+      trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryFile2);
+      trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
+
       trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryFile);
       trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+
     } catch (IOException e){
+      System.out.println("Couldn't find trajectory path");
       e.printStackTrace();
     }
 
+    fullTrajectory = trajectory1.concatenate(trajectory2);
+
+    var
+
+
     ramseteCommand = new RamseteCommand(
-            auton,
+            trajectory,
             mDrivetrain::getPose,
             new RamseteController(Constants.AutonDrivetrain.ramseteB, Constants.AutonDrivetrain.ramseteZeta),
             new SimpleMotorFeedforward(
@@ -70,7 +101,7 @@ public class RobotContainer {
             mDrivetrain::tankDriveVolts,
             mDrivetrain);
 
-    mDrivetrain.resetOdometry(auton.getInitialPose());
+    mDrivetrain.resetOdometry(trajectory.getInitialPose());
 
     return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
