@@ -37,10 +37,25 @@ public class Drivetrain extends SubsystemBase {
         mRightFollowerA = MotorControllerFactory.makeSparkMax(Constants.Drivetrain.rightFollowerAPort);
         mRightFollowerB = MotorControllerFactory.makeSparkMax(Constants.Drivetrain.rightFollowerBPort);
 
-        mLeftMotors = new MotorControllerGroup(mLeftLeader, mLeftFollowerA, mLeftFollowerB);
-        mRightMotors = new MotorControllerGroup(mRightLeader, mRightFollowerA, mLeftFollowerB);
+        mLeftLeader.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        mLeftFollowerA.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        mLeftFollowerB.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        mRightLeader.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        mRightFollowerA.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        mRightFollowerB.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
-        mRightMotors.setInverted(true);
+        mLeftFollowerA.follow(mLeftLeader);
+        mLeftFollowerB.follow(mLeftLeader);
+        mRightFollowerA.follow(mRightLeader);
+        mRightFollowerB.follow(mRightLeader);
+
+        mRightLeader.setInverted(true);
+
+        mLeftMotors = new MotorControllerGroup(mLeftLeader, mLeftFollowerA, mLeftFollowerB);
+        mRightMotors = new MotorControllerGroup(mRightLeader, mRightFollowerA, mRightFollowerB);
+//        mLeftMotors.setInverted(false); //Works
+//        mRightMotors.setInverted(true); //Works
+
 
         mDrive = new DifferentialDrive(mLeftMotors, mRightMotors);
 
@@ -74,6 +89,7 @@ public class Drivetrain extends SubsystemBase {
         mLeftMotors.setVoltage(leftVolts);
         mRightMotors.setVoltage(rightVolts);
         mDrive.feed();
+        printVelocity();
     }
 
     public void resetEncoders(){
@@ -88,7 +104,12 @@ public class Drivetrain extends SubsystemBase {
     public void arcadeDrive(){
         double throttle = deadband(Constants.driverController.getRawAxis(Axis.AxisID.LEFT_Y.getID()));
         double turn = deadband(Constants.driverController.getRawAxis(Axis.AxisID.RIGHT_X.getID()));
-        mDrive.arcadeDrive(throttle, turn);
+
+        double left = throttle - turn;
+        double right = throttle + turn;
+
+        mLeftLeader.set(left);
+        mRightLeader.set(right);
     }
 
     public double deadband(double percentOutput){
@@ -104,6 +125,11 @@ public class Drivetrain extends SubsystemBase {
     public void printVelocity(){
         System.out.println("LEFT ENCODER VELOCITY: "+mLeftEncoder.getVelocity());
         System.out.println("RIGHT ENCODER VELOCITY: "+mRightEncoder.getVelocity());
+    }
+
+    public void resetOdometry(Pose2d pose){
+        resetEncoders();
+        mDriveOdometry.resetPosition(pose, Rotation2d.fromDegrees(mPigeon.getYaw()));
     }
 
 

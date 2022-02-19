@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.Drivetrain;
 
 import java.io.IOException;
@@ -29,9 +30,12 @@ public class RobotContainer {
   public RobotContainer() {
 
     configureButtonBindings();
+    mDrivetrain.setDefaultCommand(new RunCommand(mDrivetrain::arcadeDrive, mDrivetrain));
   }
 
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+
+  }
 
 
   public Command getAutonomousCommand() {
@@ -70,7 +74,9 @@ public class RobotContainer {
             mDrivetrain::tankDriveVolts,
             mDrivetrain);
 
-//    mDrivetrain.reset(auton.getInitialPose());
+    mDrivetrain.resetOdometry(auton.getInitialPose());
+
+//    Command auton = ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
     return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
