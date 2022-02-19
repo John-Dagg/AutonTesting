@@ -18,8 +18,6 @@ import frc.robot.subsystems.Drivetrain;
 
 import java.io.IOException;
 
-
-
 public class RobotContainer {
 
   Drivetrain mDrivetrain = new Drivetrain();
@@ -75,8 +73,6 @@ public class RobotContainer {
             mDrivetrain);
 
     mDrivetrain.resetOdometry(auton.getInitialPose());
-
-//    Command auton = ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
     return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
