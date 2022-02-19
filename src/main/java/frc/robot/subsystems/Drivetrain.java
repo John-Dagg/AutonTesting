@@ -1,17 +1,19 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
-import com.revrobotics.AlternateEncoderType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.io.Axis;
 import frc.robot.util.MotorControllerFactory;
 
 public class Drivetrain extends SubsystemBase {
@@ -49,8 +51,60 @@ public class Drivetrain extends SubsystemBase {
 
         mDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(mPigeon.getYaw()));
 
+    }
 
+    public DifferentialDriveWheelSpeeds getWheelSpeeds(){
+        return new DifferentialDriveWheelSpeeds(mLeftEncoder.getVelocity(), mRightEncoder.getVelocity());
+    }
 
+    public double getHeading(){
+        return mPigeon.getYaw();
+    }
+
+    @Override
+    public void periodic(){
+        mDriveOdometry.update(Rotation2d.fromDegrees(mPigeon.getYaw()), mLeftEncoder.getPosition(), mRightEncoder.getPosition());
+    }
+
+    public Pose2d getPose(){
+        return mDriveOdometry.getPoseMeters();
+    }
+
+    public void tankDriveVolts(double leftVolts, double rightVolts){
+        mLeftMotors.setVoltage(leftVolts);
+        mRightMotors.setVoltage(rightVolts);
+        mDrive.feed();
+    }
+
+    public void resetEncoders(){
+        mLeftEncoder.setPosition(0);
+        mRightEncoder.setPosition(0);
+    }
+
+    public void resetYaw(){
+        mPigeon.setYaw(0);
+    }
+
+    public void arcadeDrive(){
+        double throttle = deadband(Constants.driverController.getRawAxis(Axis.AxisID.LEFT_Y.getID()));
+        double turn = deadband(Constants.driverController.getRawAxis(Axis.AxisID.RIGHT_X.getID()));
+        mDrive.arcadeDrive(throttle, turn);
+    }
+
+    public double deadband(double percentOutput){
+        return Math.abs(percentOutput) > Constants.Drivetrain.deadband ? percentOutput : 0;
+    }
+
+    public void printDistance(){
+        System.out.println("LEFT ENCODER DISTANCE: "+mLeftEncoder.getPosition());
+        System.out.println("RIGHT ENCODER DISTANCE "+mRightEncoder.getPosition());
 
     }
+
+    public void printVelocity(){
+        System.out.println("LEFT ENCODER VELOCITY: "+mLeftEncoder.getVelocity());
+        System.out.println("RIGHT ENCODER VELOCITY: "+mRightEncoder.getVelocity());
+    }
+
+
 }
