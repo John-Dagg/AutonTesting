@@ -12,7 +12,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -88,15 +87,7 @@ public class Drivetrain extends SubsystemBase {
     public void arcadeDrive(){
         double throttle = deadband(Constants.driverController.getRawAxis(Axis.AxisID.LEFT_Y.getID()));
         double turn = deadband(Constants.driverController.getRawAxis(Axis.AxisID.RIGHT_X.getID()));
-/*
-        double left = throttle - turn;
-        double right = throttle + turn;
 
-        mLeftLeader.set(left);
-        mRightLeader.set(right);
-
-        mDrive.feed();
-*/
         mDrive.arcadeDrive(-throttle, turn);
 
     }
