@@ -48,17 +48,6 @@ public class Drivetrain extends SubsystemBase {
         mRightFollowerA.setIdleMode(CANSparkMax.IdleMode.kBrake);
         mRightFollowerB.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
-        /*
-        mLeftFollowerA.follow(mLeftLeader);
-        mLeftFollowerB.follow(mLeftLeader);
-        mRightFollowerA.follow(mRightLeader);
-        mRightFollowerB.follow(mRightLeader);
-
-        mRightLeader.setInverted(true);
-        mRightFollowerA.setInverted(true);
-        mRightFollowerB.setInverted(true);
-         */
-
         mLeftMotors = new MotorControllerGroup(mLeftLeader, mLeftFollowerA, mLeftFollowerB);
         mRightMotors = new MotorControllerGroup(mRightLeader, mRightFollowerA, mRightFollowerB);
         mLeftMotors.setInverted(true);
@@ -122,14 +111,6 @@ public class Drivetrain extends SubsystemBase {
 
         mDrive.arcadeDrive(throttle, turn);
 
-        /*
-        double left = throttle - turn;
-        double right = throttle + turn;
-
-        mLeftLeader.set(left);
-        mRightLeader.set(right);
-
-         */
     }
 
     public double deadband(double percentOutput){

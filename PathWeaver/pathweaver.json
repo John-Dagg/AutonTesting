@@ -4,6 +4,6 @@
   "maxVelocity": 1.6,
   "maxAcceleration": 25.0,
   "trackWidth": 0.648,
-  "gameName": "Infinite Recharge",
-  "outputDir": ""
+  "gameName": "Rapid React",
+  "outputDir": "../src/main/deploy"
 }

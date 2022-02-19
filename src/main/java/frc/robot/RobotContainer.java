@@ -11,15 +11,25 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.Drivetrain;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class RobotContainer {
 
+  //Setting up auton files
+  private String pathing = "StraightPath"; //Change this to change trajectory
+
+  private String trajectoryFile = "output/"+pathing+".wpilib.json";
+  private Path trajectoryPath;
+  private Trajectory trajectory;
+
+  //Subsystems
   Drivetrain mDrivetrain = new Drivetrain();
 
   Trajectory auton;
@@ -38,24 +48,12 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
 
-    var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-            new SimpleMotorFeedforward(
-                    Constants.AutonDrivetrain.ks,
-                    Constants.AutonDrivetrain.kv,
-                    Constants.AutonDrivetrain.ka),
-            Constants.AutonDrivetrain.driveKinematics, 10);
-
-    TrajectoryConfig config = new TrajectoryConfig(
-            Constants.AutonDrivetrain.maxVel, Constants.AutonDrivetrain.maxAccel)
-            .setKinematics(Constants.AutonDrivetrain.driveKinematics)
-            .addConstraint(autoVoltageConstraint);
-
     try {
-      auton = TrajectoryUtil.fromPathweaverJson(Constants.AutonDrivetrain.trajectoryPath);
-    } catch (IOException e) {
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryFile);
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    } catch (IOException e){
       e.printStackTrace();
     }
-
 
     ramseteCommand = new RamseteCommand(
             auton,

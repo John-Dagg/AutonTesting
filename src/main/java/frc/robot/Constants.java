@@ -34,8 +34,6 @@ public final class Constants {
         public static final double ramseteB = 2;
         public static final double ramseteZeta = 0.7;
 
-        public static final Path trajectoryPath = Path.of(Filesystem.getDeployDirectory().toString() + "/traj.json");
-
     }
 
     public static final class Drivetrain{
