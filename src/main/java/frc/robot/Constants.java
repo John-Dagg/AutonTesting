@@ -28,7 +28,7 @@ public final class Constants {
         public static final DifferentialDriveKinematics driveKinematics = new DifferentialDriveKinematics(robotWidth);
 
         public static final double maxVel = 1.6; //Meters per second (Estimated Value)
-        public static final double maxAccel = 2; //Meters per second squared (Estimated Value)
+        public static final double maxAccel = 25; //Meters per second squared (Estimated Value)
 
         //Constants for using the ramsete controller
         public static final double ramseteB = 2;

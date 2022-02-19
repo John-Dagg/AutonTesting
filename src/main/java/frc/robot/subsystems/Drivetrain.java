@@ -125,7 +125,7 @@ public class Drivetrain extends SubsystemBase {
 //        System.out.println("Yaw: " + getHeading());
 
         if (Math.abs(mLeftVolts) > 0.0) {
-            System.out.println("LEFT VOLTS: " + mLeftVolts + " | RIGHT VOLTS: " + mRightVolts);
+//            System.out.println("LEFT VOLTS: " + mLeftVolts + " | RIGHT VOLTS: " + mRightVolts);
         }
 
 //        printDistance();

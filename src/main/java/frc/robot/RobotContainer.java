@@ -7,8 +7,12 @@ package frc.robot;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -20,6 +24,7 @@ import frc.robot.subsystems.Drivetrain;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 public class RobotContainer {
 
@@ -83,11 +88,31 @@ public class RobotContainer {
 
     fullTrajectory = trajectory1.concatenate(trajectory2);
 
-    var
+    var autoVoltageConstraint =
+            new DifferentialDriveVoltageConstraint(
+                    new SimpleMotorFeedforward(
+                            Constants.AutonDrivetrain.ks,
+                            Constants.AutonDrivetrain.kv,
+                            Constants.AutonDrivetrain.ka),
+                    Constants.AutonDrivetrain.driveKinematics,
+                    10);
+
+    TrajectoryConfig config =
+            new TrajectoryConfig(
+                    Constants.AutonDrivetrain.maxVel,
+                    Constants.AutonDrivetrain.maxAccel)
+                    .setKinematics(Constants.AutonDrivetrain.driveKinematics)
+                    .addConstraint(autoVoltageConstraint);
+
+
+    Trajectory simpleTrajectory = TrajectoryGenerator.generateTrajectory(
+            new Pose2d(0, 0, new Rotation2d(0)),
+            List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+            new Pose2d(3, 0, new Rotation2d(0)), config);
 
 
     ramseteCommand = new RamseteCommand(
-            trajectory,
+            simpleTrajectory,
             mDrivetrain::getPose,
             new RamseteController(Constants.AutonDrivetrain.ramseteB, Constants.AutonDrivetrain.ramseteZeta),
             new SimpleMotorFeedforward(
@@ -101,7 +126,7 @@ public class RobotContainer {
             mDrivetrain::tankDriveVolts,
             mDrivetrain);
 
-    mDrivetrain.resetOdometry(trajectory.getInitialPose());
+    mDrivetrain.resetOdometry(simpleTrajectory.getInitialPose());
 
     return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
