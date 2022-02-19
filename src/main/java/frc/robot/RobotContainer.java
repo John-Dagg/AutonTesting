@@ -4,19 +4,26 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import frc.robot.subsystems.Drivetrain;
+
+import java.io.IOException;
+
 
 
 public class RobotContainer {
 
+  Drivetrain mDrivetrain = new Drivetrain();
+
+  Trajectory auton;
 
   public RobotContainer() {
 
@@ -40,7 +47,26 @@ public class RobotContainer {
             .setKinematics(Constants.AutonDrivetrain.driveKinematics)
             .addConstraint(autoVoltageConstraint);
 
-//    Trajectory auton = 
+    try {
+      auton = TrajectoryUtil.fromPathweaverJson(Constants.AutonDrivetrain.trajectoryPath);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    RamseteCommand ramseteCommand;
+    ramseteCommand = new RamseteCommand(
+            auton,
+            mDrivetrain::getPose,
+            new RamseteController(Constants.AutonDrivetrain.ramseteB, Constants.AutonDrivetrain.ramseteZeta),
+            new SimpleMotorFeedforward(
+                    Constants.AutonDrivetrain.ks,
+                    Constants.AutonDrivetrain.kv,
+                    Constants.AutonDrivetrain.ka),
+            Constants.AutonDrivetrain.driveKinematics,
+            mDrivetrain::getWheelSpeeds,
+            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0)
+; new PIDController(Constants.AutonDrivetrain.kP, 0 ,0)
+            );
 
     return null;
 

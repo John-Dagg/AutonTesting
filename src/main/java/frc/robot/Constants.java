@@ -6,7 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
+
+import java.io.File;
+import java.nio.file.Path;
 
 public final class Constants {
 
@@ -29,6 +33,8 @@ public final class Constants {
         //Constants for using the ramsete controller
         public static final double ramseteB = 2;
         public static final double ramseteZeta = 0.7;
+
+        public static final Path trajectoryPath = Path.of(Filesystem.getDeployDirectory().toString() + "/traj.json");
 
     }
 
