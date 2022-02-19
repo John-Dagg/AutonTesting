@@ -72,8 +72,8 @@ public class Drivetrain extends SubsystemBase {
 
         mLeftEncoder = mLeftLeader.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 4096);
         mRightEncoder = mRightLeader.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 4096);
-        mLeftEncoder.setInverted(true);
-        mRightEncoder.setInverted(false);
+        mLeftEncoder.setInverted(false);
+        mRightEncoder.setInverted(true);
 
 
         mPigeon = new Pigeon2(0);
@@ -138,8 +138,11 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void tankDriveVolts(double leftVolts, double rightVolts){
-        mLeftVolts = leftVolts / 12;
-        mRightVolts = rightVolts / 12;
+        mLeftVolts = leftVolts;
+        mRightVolts = rightVolts;
+
+        SmartDashboard.putNumber("Left Voltage", mLeftVolts);
+        SmartDashboard.putNumber("Right Voltage", mRightVolts);
 
         mLeftMotors.setVoltage(mLeftVolts);
         mRightMotors.setVoltage(mRightVolts);

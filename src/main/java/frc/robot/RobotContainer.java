@@ -15,7 +15,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -29,7 +31,7 @@ import java.util.List;
 public class RobotContainer {
 
   //Setting up auton files
-  private String pathing = "Reverse1";
+  private String pathing = "CurvePath";
 
   private String trajectoryFile = "output/"+pathing+".wpilib.json";
   private Path trajectoryPath;
@@ -110,23 +112,49 @@ public class RobotContainer {
             List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
             new Pose2d(3, 0, new Rotation2d(0)), config);
 
+    RamseteController mController = new RamseteController(Constants.AutonDrivetrain.ramseteB, Constants.AutonDrivetrain.ramseteZeta);
+
+    mController.setEnabled(true);
+
+    PIDController leftPID = new PIDController(Constants.AutonDrivetrain.kP, 0, 0);
+    PIDController rightPID = new PIDController(Constants.AutonDrivetrain.kP, 0, 0);
+
+    var table = NetworkTableInstance.getDefault().getTable("Troubleshooting");
+    var leftReference = table.getEntry("Left Reference");
+    var leftMeasurement = table.getEntry("Left Measurement");
+    var rightReference = table.getEntry("Right Reference");
+    var rightMeasurement = table.getEntry("Right Measurement");
 
     ramseteCommand = new RamseteCommand(
-            simpleTrajectory,
+            trajectory,
             mDrivetrain::getPose,
-            new RamseteController(Constants.AutonDrivetrain.ramseteB, Constants.AutonDrivetrain.ramseteZeta),
+            mController,
             new SimpleMotorFeedforward(
                     Constants.AutonDrivetrain.ks,
                     Constants.AutonDrivetrain.kv,
                     Constants.AutonDrivetrain.ka),
             Constants.AutonDrivetrain.driveKinematics,
             mDrivetrain::getWheelSpeeds,
-            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0),
-            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0),
-            mDrivetrain::tankDriveVolts,
+            leftPID,
+            rightPID,
+            (leftVolts, rightVolts) -> {
+              mDrivetrain.tankDriveVolts(leftVolts, rightVolts);
+
+              SmartDashboard.putNumber("Left Reference", leftPID.getSetpoint());
+              SmartDashboard.putNumber("Left Measurement", mDrivetrain.getWheelSpeeds().leftMetersPerSecond);
+
+              SmartDashboard.putNumber("Right Reference", rightPID.getSetpoint());
+              SmartDashboard.putNumber("Right Measurement", mDrivetrain.getWheelSpeeds().rightMetersPerSecond);
+
+              leftMeasurement.setNumber(mDrivetrain.getWheelSpeeds().leftMetersPerSecond);
+              leftReference.setNumber(leftPID.getSetpoint());
+
+              rightMeasurement.setNumber(mDrivetrain.getWheelSpeeds().rightMetersPerSecond);
+              rightReference.setNumber(rightPID.getSetpoint());
+            },
             mDrivetrain);
 
-    mDrivetrain.resetOdometry(simpleTrajectory.getInitialPose());
+    mDrivetrain.resetOdometry(trajectory.getInitialPose());
 
     return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
