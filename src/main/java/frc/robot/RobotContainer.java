@@ -24,6 +24,7 @@ public class RobotContainer {
   Drivetrain mDrivetrain = new Drivetrain();
 
   Trajectory auton;
+  RamseteCommand ramseteCommand;
 
   public RobotContainer() {
 
@@ -53,7 +54,7 @@ public class RobotContainer {
       e.printStackTrace();
     }
 
-    RamseteCommand ramseteCommand;
+
     ramseteCommand = new RamseteCommand(
             auton,
             mDrivetrain::getPose,
@@ -64,11 +65,14 @@ public class RobotContainer {
                     Constants.AutonDrivetrain.ka),
             Constants.AutonDrivetrain.driveKinematics,
             mDrivetrain::getWheelSpeeds,
-            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0)
-; new PIDController(Constants.AutonDrivetrain.kP, 0 ,0)
-            );
+            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0),
+            new PIDController(Constants.AutonDrivetrain.kP, 0 ,0),
+            mDrivetrain::tankDriveVolts,
+            mDrivetrain);
 
-    return null;
+//    mDrivetrain.reset(auton.getInitialPose());
+
+    return ramseteCommand.andThen(() -> mDrivetrain.tankDriveVolts(0,0));
 
   }
 }
